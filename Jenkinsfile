@@ -1,10 +1,6 @@
 pipeline {
 
-    agent {
-        node {
-            label 'jenkins-cloud-agent'
-        }
-    }
+    agent any
 
     stages {
         
