@@ -12,7 +12,9 @@ pipeline {
             steps {
                 sh "printenv"
                 
-                sh "docker image build -t raleonid/app-meow:0.0.2 ."
+                script {
+                    def customImage = docker.build("raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID}")
+                }
                 
                 sh """
                 echo "Success build docker image 1"
