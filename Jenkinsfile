@@ -3,59 +3,35 @@ pipeline {
         kubernetes {
             label 'img'
             yaml """
-apiVersion: v1
 kind: Pod
 metadata:
-  labels:
-    run: img
   name: img
   annotations:
-    container.apparmor.security.beta.kubernetes.io/img: unconfined
+    container.apparmor.security.beta.kubernetes.io/img: unconfined  
 spec:
-  securityContext:
-    runAsUser: 1000
-  initContainers:
-    # This container clones the desired git repo to the EmptyDir volume.
-    - name: git-clone
-      image: r.j3ss.co/jq
-      args:
-        - git
-        - clone
-        - --single-branch
-        - --
-        - https://github.com/jessfraz/dockerfiles
-        - /repo # Put it in the volume
-      securityContext:
-        allowPrivilegeEscalation: false
-        readOnlyRootFilesystem: true
-      volumeMounts:
-        - name: git-repo
-          mountPath: /repo
   containers:
-  - image: r.j3ss.co/img
+  - name: img
+    workingDir: /home/jenkins
+    image: r.j3ss.co/img
     imagePullPolicy: Always
-    name: img
-    resources: {}
-    workingDir: /repo
-    command:
-    - img
-    - build
-    - -t
-    - irssi
-    - irssi/
     securityContext:
-      rawProc: true
+        rawProc: true
+        privileged: true
+    command:
+    - cat
+    tty: true
     volumeMounts:
-    - name: cache-volume
-      mountPath: /tmp
-    - name: git-repo
-      mountPath: /repo
+      - name: jenkins-docker-cfg
+        mountPath: /root
   volumes:
-  - name: cache-volume
-    emptyDir: {}
-  - name: git-repo
-    emptyDir: {}
-  restartPolicy: Never
+  - name: jenkins-docker-cfg
+    projected:
+      sources:
+      - secret:
+          name: regcred
+          items:
+            - key: .dockerconfigjson
+              path: .docker/config.json
 """
         }
     }
