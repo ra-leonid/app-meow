@@ -21,6 +21,10 @@ pipeline {
                     sh "docker image build -t raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID} ."
                     sh "docker image build -t raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID} ."                
                 }               
+                
+                sh """
+                echo "Success build docker image1"
+                """
             }
         }
     }   
