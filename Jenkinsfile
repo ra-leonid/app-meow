@@ -1,60 +1,67 @@
 pipeline {
-  agent {
-    kubernetes {
-      label 'dind'
-      defaultContainer 'docker'
-      yaml """
----
-apiVersion: v1
+    agent {
+        kubernetes {
+            label 'img'
+            yaml """
 kind: Pod
 metadata:
-  labels:
-    app: jenkins
+  name: img
+  annotations:
+    container.apparmor.security.beta.kubernetes.io/img: unconfined  
 spec:
   containers:
-    - name: docker
-      image: docker:latest
-      command:
-        - /bin/cat
-      tty: true
-      volumeMounts:
-        - name: dind-certs
-          mountPath: /certs
-      env:
-        - name: DOCKER_TLS_CERTDIR
-          value: /certs
-        - name: DOCKER_CERT_PATH
-          value: /certs
-        - name: DOCKER_TLS_VERIFY
-          value: 1
-        - name: DOCKER_HOST
-          value: tcp://localhost:2376
-    - name: dind
-      image: docker:dind
-      securityContext:
+  - name: golang
+    image: golang:1.11
+    command:
+    - cat
+    tty: true
+  - name: img
+    workingDir: /home/jenkins
+    image: caladreas/img:0.5.1
+    imagePullPolicy: Always
+    securityContext:
+        rawProc: true
         privileged: true
-      env:
-        - name: DOCKER_TLS_CERTDIR
-          value: /certs
-      volumeMounts:
-        - name: dind-storage
-          mountPath: /var/lib/docker
-        - name: dind-certs
-          mountPath: /certs
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+      - name: jenkins-docker-cfg
+        mountPath: /root
   volumes:
-    - name: dind-storage
-      emptyDir: {}
-    - name: dind-certs
-      emptyDir: {}
+  - name: temp
+    emptyDir: {}
+  - name: jenkins-docker-cfg
+    projected:
+      sources:
+      - secret:
+          name: regcred
+          items:
+            - key: .dockerconfigjson
+              path: .docker/config.json
 """
+        }
     }
-  }
-  stages {
-    stage('Run Docker Things') {
-      steps {
-        sh 'printenv'
-        sh 'docker info'
-      }
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/joostvdg/cat.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                container('golang') {
+                    sh './build-go-bin.sh'
+                }
+            }
+        }
+        stage('Make Image') {
+            steps {
+                container('img') {
+                    sh 'mkdir cache'
+                    sh 'img build -s ./cache -f Dockerfile.run -t caladreas/cat .'
+                }
+            }
+        }
     }
-  }
 }
