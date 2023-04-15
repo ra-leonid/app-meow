@@ -12,12 +12,16 @@ pipeline {
             steps {
                 sh "printenv"
                 
-                script {
-                    def customImage = docker.build("raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID}")
-                }
+                sh "docker login -u username --password-stdin"
+                sh "docker image build -t raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID} ."                
+                sh "docker image build -t raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID} ."                
+                
+                //script {
+                //    def customImage = docker.build("raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID}")
+                //}
                 
                 sh """
-                echo "Success build docker image 1"
+                echo "Success build docker image"
                 """
             }
         }
