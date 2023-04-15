@@ -1,21 +1,42 @@
 pipeline {
-    agent none
-    stages {
-        stage('Back-end') {
-            agent {
-                docker { image 'maven:3.9.0-eclipse-temurin-11' }
-            }
-            steps {
-                sh 'mvn --version'
-            }
+  agent none
+  stages {
+    //Build container image
+    stage('Build') {
+      agent {
+        kubernetes {
+          label 'jenkinsrun'
+          defaultContainer 'dind'
+          yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: dind
+    image: docker:18.05-dind
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: dind-storage
+        mountPath: /var/lib/docker
+  volumes:
+    - name: dind-storage
+      emptyDir: {}
+"""
         }
-        stage('Front-end') {
-            agent {
-                docker { image 'node:16.13.1-alpine' }
+      }
+      steps {
+        container('dind') {
+          script {
+            docker.withRegistry('https://registry.hub.docker.com', 'auth-dockerhub') {
+              //build the image
+              def customImage = docker.build("raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID}")
+              //upload it to the registry
+              customImage.push()
             }
-            steps {
-                sh 'node --version'
-            }
+          }
         }
+      }
     }
+  }
 }
