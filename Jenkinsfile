@@ -1,79 +1,60 @@
 pipeline {
-
   agent {
     kubernetes {
-      yaml '''
-        apiVersion: v1
-        kind: Pod
-        spec:
-          containers:
-          - name: docker
-            image: docker:latest
-            command:
-            - cat
-            tty: true
-            volumeMounts:
-             - mountPath: /var/run/docker.sock
-               name: docker-sock
-          volumes:
-          - name: docker-sock
-            hostPath:
-              path: /var/run/docker.sock    
-        '''
+      label 'dind'
+      defaultContainer 'docker'
+      yaml """
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: jenkins
+spec:
+  containers:
+    - name: docker
+      image: docker:latest
+      command:
+        - /bin/cat
+      tty: true
+      volumeMounts:
+        - name: dind-certs
+          mountPath: /certs
+      env:
+        - name: DOCKER_TLS_CERTDIR
+          value: /certs
+        - name: DOCKER_CERT_PATH
+          value: /certs
+        - name: DOCKER_TLS_VERIFY
+          value: 1
+        - name: DOCKER_HOST
+          value: tcp://localhost:2376
+    - name: dind
+      image: docker:dind
+      securityContext:
+        privileged: true
+      env:
+        - name: DOCKER_TLS_CERTDIR
+          value: /certs
+      volumeMounts:
+        - name: dind-storage
+          mountPath: /var/lib/docker
+        - name: dind-certs
+          mountPath: /certs
+  volumes:
+    - name: dind-storage
+      emptyDir: {}
+    - name: dind-certs
+      emptyDir: {}
+"""
     }
   }
-
   stages {
-    stage('Build-Docker-Image') {
+    stage('Run Docker Things') {
       steps {
-        container('docker') {
-          sh 'docker build -t ss69261/testing-image:latest .'
-        }
-      }
-    }
-    stage('Login-Into-Docker') {
-      steps {
-        container('docker') {
-          sh 'docker login -u <docker_username> -p <docker_password>'
-        }
-      }
-    }
-    stage('Push-Images-Docker-to-DockerHub') {
-      steps {
-        container('docker') {
-          sh 'docker push ss69261/testing-image:latest'
-        }
-      }
-    }
-  }
-  post {
-    always {
-      container('docker') {
-        sh 'docker logout'
+        sh 'printenv'
+        sh 'docker info'
       }
     }
   }
 }
-        
-//         stage('Build docker image') {
-//             steps {
-//                 sh "printenv"
-
-//                 withCredentials([
-//                     usernamePassword(
-//                         credentialsId: 'auth-dockerhub',
-//                         usernameVariable: 'USERNAME',
-//                         passwordVariable: 'PASSWORD')]) {
-//                     sh "dockerd"
-//                     sh "docker login -u ${USERNAME} -p ${PASSWORD}"
-//                     sh "docker image build -t raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID} ."
-//                     sh "docker image build -t raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID} ."                
-//                 }               
-                
-//                 sh """
-//                 echo "Success build docker image1"
-//                 """
-//             }
-//         }
-//     }   
-// }
