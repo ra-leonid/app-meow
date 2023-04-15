@@ -43,23 +43,23 @@ spec:
         }
     }
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/joostvdg/cat.git'
-            }
-        }
-        stage('Build') {
-            steps {
-                container('golang') {
-                    sh './build-go-bin.sh'
-                }
-            }
-        }
+        // stage('Checkout') {
+        //     steps {
+        //         git 'https://github.com/joostvdg/cat.git'
+        //     }
+        // }
+        // stage('Build') {
+        //     steps {
+        //         container('golang') {
+        //             sh './build-go-bin.sh'
+        //         }
+        //     }
+        // }
         stage('Make Image') {
             steps {
                 container('img') {
                     sh 'mkdir cache'
-                    sh 'img build -s ./cache -f Dockerfile.run -t caladreas/cat .'
+                    sh 'img build -s ./cache -f Dockerfile -t raleonid/app-meow .'
                 }
             }
         }
