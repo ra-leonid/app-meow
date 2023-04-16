@@ -1,42 +1,41 @@
 pipeline {
   agent none
   stages {
-    //Build container image
     stage('Build') {
       agent {
         kubernetes {
           label 'jenkinsrun'
-          defaultContainer 'dind'
+          defaultContainer 'builder'
           yaml """
-apiVersion: v1
 kind: Pod
+metadata:
+  name: kaniko
 spec:
   containers:
-  - name: dind
-    image: docker:18.05-dind
-    securityContext:
-      privileged: true
+  - name: builder
+    image: gcr.io/kaniko-project/executor:latest
+    imagePullPolicy: Always
+    command:
+    - /busybox/cat
+    tty: true
     volumeMounts:
-      - name: dind-storage
-        mountPath: /var/lib/docker
+      - name: kaniko-secret
+        mountPath: /kaniko/.docker
   volumes:
-    - name: dind-storage
-      emptyDir: {}
+    - name: kaniko-secret
+      secret:
+        secretName: regcred
+        items:
+        - key: .dockerconfigjson
+          path: config.json
 """
         }
       }
-      steps {
-        container('dind') {
+    steps {
           script {
-            docker.withRegistry('https://registry.hub.docker.com', 'auth-dockerhub') {
-              //build the image
-              def customImage = docker.build("raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID}")
-              //upload it to the registry
-              customImage.push()
-            }
-          }
+            sh "/kaniko/executor --dockerfile `pwd`/Dockerfile --context `pwd` --destination=index.docker.io/v2/raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID}-kaniko"
         }
-      }
-    }
+      } //steps
+    } //stage(build)
   }
 }
