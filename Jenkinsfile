@@ -33,7 +33,7 @@ spec:
       }
     steps {
           script {
-            sh "/kaniko/executor --dockerfile `pwd`/Dockerfile --context `pwd` --destination=index.docker.io/v1/raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID}-kaniko"
+            sh "/kaniko/executor --dockerfile `pwd`/Dockerfile --context `pwd` --destination=index.docker.io/v2/raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID}-kaniko"
         }
       } //steps
     } //stage(build)
