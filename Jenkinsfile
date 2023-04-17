@@ -34,7 +34,7 @@ spec:
               //upload it to the registry
               customImage.push()
 
-              println "test"
+              println "test1"
             }
           }
         }
