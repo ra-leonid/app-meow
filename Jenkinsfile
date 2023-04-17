@@ -34,7 +34,7 @@ spec:
               def customImage = docker.build("raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID}")
               //upload it to the registry
               customImage.push()
-              println "test1"
+              println "test2"
             }
           }
         }
