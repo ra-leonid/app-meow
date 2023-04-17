@@ -38,7 +38,6 @@ spec:
             }
           }
         }
-        sh "kubectl version"
       }
     }
   }
