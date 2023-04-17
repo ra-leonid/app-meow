@@ -26,6 +26,7 @@ spec:
         }
       }
       steps {
+        sh "printenv"
         container('dind') {
           script {
             docker.withRegistry('https://registry.hub.docker.com', 'auth-dockerhub') {
