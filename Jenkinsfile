@@ -29,7 +29,7 @@ spec:
         sh "printenv"
         container('dind') {
           script {
-            docker.withRegistry('https://registry.hub.docker.com', 'auth-dockerhub') {
+            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-auth') {
               //build the image
               def customImage = docker.build("raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID}")
               //upload it to the registry
