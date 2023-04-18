@@ -30,14 +30,41 @@ spec:
         container('dind') {
           script {
             docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-auth') {
+              def pathTag = "raleonid/app-meow:${JOB_BASE_NAME}"
+              if(TAG_NAME == null || TAG_NAME.length() == 0) {
+                pathTag = "${pathTag}-${BUILD_ID}"
+              }
               //build the image
-              def customImage = docker.build("raleonid/app-meow:${JOB_BASE_NAME}-${BUILD_ID}")
+              def customImage = docker.build(pathTag)
               //upload it to the registry
               customImage.push()
               println "test4"
             }
           }
         }
+      }
+    }
+    stage('Deploy') {
+      agent {
+        kubernetes {
+          label 'helm-pod'
+          containerTemplate {
+            name 'helm'
+            image 'wardviaene/helm-s3'
+            ttyEnable true
+            command 'cat'
+          }
+        }
+      }
+      when {
+          // Only say hello if a "greeting" is requested
+          expression { TAG_NAME != null && TAG_NAME.length() > 0 }
+      }
+      steps {
+        container('helm') {
+          sh "helm template app -n stage --set image.tag=${TAG_NAME} > deployment.yaml"
+        }
+        kubernetesDeploy(configs: "deployment.yaml")
       }
     }
   }

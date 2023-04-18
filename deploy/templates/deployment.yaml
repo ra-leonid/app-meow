@@ -4,6 +4,7 @@ metadata:
   labels:
     {{- include "app.labels" . | nindent 4 }}
   name: {{ include "app.fullname" . }}
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
