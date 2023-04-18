@@ -46,6 +46,7 @@ pipeline {
 //     }
     stage('Deploy') {
       agent {
+        
         kubernetes {
           label 'helm-pod'
           yaml """
