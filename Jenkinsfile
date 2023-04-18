@@ -70,6 +70,7 @@ spec:
         container('helm') {
           sh "helm template deploy -n stage --set image.tag=${TAG_NAME} > deployment.yaml"
           sh "readlink -f deployment.yaml"
+          sh "helm upgrade --install app-meow deploy --create-namespace -n $(ns)"
         }
       }
     }
@@ -80,9 +81,10 @@ spec:
       }
       steps {
         // kubernetesDeploy(configs: "deployment.yaml")
-        withKubeConfig([namespace: "stage"]) {
-          sh 'kubectl apply -f deployment.yaml'
-        }
+        // withKubeConfig([namespace: "stage"]) {
+        //   sh 'kubectl apply -f deployment.yaml'
+        // }
+        sh "readlink -f deployment.yaml"
 
       }
     }
