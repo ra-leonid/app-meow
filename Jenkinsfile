@@ -70,7 +70,7 @@ spec:
         container('helm') {
           sh "helm template deploy -n stage --set image.tag=${TAG_NAME} > deployment.yaml"
           sh "readlink -f deployment.yaml"
-          sh "helm upgrade --install app-meow deploy --create-namespace -n stage"
+          //sh "helm upgrade --install app-meow deploy --create-namespace -n stage"
         }
       }
     }
@@ -84,7 +84,12 @@ spec:
         // withKubeConfig([namespace: "stage"]) {
         //   sh 'kubectl apply -f deployment.yaml'
         // }
-        sh "readlink -f deployment.yaml"
+        // sh "readlink -f deployment.yaml"
+        withKubeConfig([credentialsId: 'jenkins', namespace: "stage"]) {
+            sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
+            sh 'chmod u+x ./kubectl'
+            sh './kubectl get pods -n stage'
+        }
 
       }
     }
