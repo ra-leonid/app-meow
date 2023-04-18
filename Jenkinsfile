@@ -82,7 +82,7 @@ pipeline {
         }
       }
       when {
-          // Only say hello if a "greeting" is requestedddd
+          // Only say hello if a "greeting" is requesteddd
           expression { true || env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
       }
       steps {
