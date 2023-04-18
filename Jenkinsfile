@@ -85,7 +85,7 @@ spec:
         //   sh 'kubectl apply -f deployment.yaml'
         // }
         // sh "readlink -f deployment.yaml"
-        withKubeConfig([credentialsId: 'jenkins', namespace: "stage"]) {
+        withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
             sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
             sh 'chmod u+x ./kubectl'
             sh './kubectl get pods -n stage'
