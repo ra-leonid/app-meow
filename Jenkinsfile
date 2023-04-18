@@ -44,40 +44,40 @@ pipeline {
 //         }
 //       }
 //     }
-    stage('Deploy') {
-      agent {
+//     stage('Deploy') {
+//       agent {
 
-        kubernetes {
-          label 'helm-pod'
-          yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: helm
-    image: wardviaene/helm-s3
-    command:
-    - cat
-    tty: true
-"""
-         }
-      }
-      when {
-          // Only say hello if a "greeting" is requested
-          expression { env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
-      }
-      steps {
-        container('helm') {
-          sh "helm template deploy -n stage --set image.tag=${TAG_NAME} > deployment.yaml"
-          sh "readlink -f deployment.yaml"
-          //sh "helm upgrade --install app-meow deploy --create-namespace -n stage"
-        }
-      }
-    }
+//         kubernetes {
+//           label 'helm-pod'
+//           yaml """
+// apiVersion: v1
+// kind: Pod
+// spec:
+//   containers:
+//   - name: helm
+//     image: wardviaene/helm-s3
+//     command:
+//     - cat
+//     tty: true
+// """
+//          }
+//       }
+//       when {
+//           // Only say hello if a "greeting" is requested
+//           expression { env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
+//       }
+//       steps {
+//         container('helm') {
+//           sh "helm template deploy -n stage --set image.tag=${TAG_NAME} > deployment.yaml"
+//           sh "readlink -f deployment.yaml"
+//           //sh "helm upgrade --install app-meow deploy --create-namespace -n stage"
+//         }
+//       }
+//     }
     stage('Deploy1') {
       when {
           // Only say hello if a "greeting" is requested
-          expression { env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
+          expression { true || env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
       }
       steps {
         // kubernetesDeploy(configs: "deployment.yaml")
@@ -85,12 +85,13 @@ spec:
         //   sh 'kubectl apply -f deployment.yaml'
         // }
         // sh "readlink -f deployment.yaml"
-        withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
-            sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
-            sh 'chmod u+x ./kubectl'
-            sh './kubectl get pods -n stage'
+        // withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
+        withKubeConfig([credentialsId: 'admin_jenkins']) {
+            // sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
+            // sh 'chmod u+x ./kubectl'
+            // sh './kubectl get pods -n stage'
+            sh "echo test"
         }
-
       }
     }
   }
