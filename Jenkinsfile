@@ -38,7 +38,7 @@ pipeline {
 //               def customImage = docker.build(pathTag)
 //               //upload it to the registry
 //               customImage.push()
-//               println "test5"
+//               println "test6"
 //             }
 //           }
 //         }
