@@ -48,7 +48,6 @@ pipeline {
       agent {
         kubernetes {
           label 'helm-pod'
-          defaultContainer 'helm'
           yaml """
 apiVersion: v1
 kind: Pod
@@ -56,10 +55,9 @@ spec:
   containers:
   - name: helm
     image: wardviaene/helm-s3
-    ttyEnable: true
-    command: 'cat'
-    securityContext:
-      privileged: true
+    command:
+    - cat
+    tty: true
     volumeMounts:
       - name: helm-storage
         mountPath: /var/lib/docker
