@@ -86,9 +86,9 @@ pipeline {
           expression { true || env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
       }
       steps {
-        script {
-              kubernetes.image().withName("raleonid/app-meow:${JOB_BASE_NAME}").build().fromPath(".")
-        }
+        // script {
+        //       kubernetes.image().withName("raleonid/app-meow:${JOB_BASE_NAME}").build().fromPath(".")
+        // }
         // kubernetesDeploy(configs: "deployment.yaml")
         // withKubeConfig([namespace: "stage"]) {
         //   sh 'kubectl apply -f deployment.yaml'
