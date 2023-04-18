@@ -5,7 +5,7 @@ pipeline {
 //     stage('Build') {
 //       agent {
 //         kubernetes {
-//           label 'jenkinsrun'
+//           inheritFrom 'jenkinsrun'
 //           defaultContainer 'dind'
 //           yaml """
 // apiVersion: v1
@@ -48,7 +48,7 @@ pipeline {
 //       agent {
 
 //         kubernetes {
-//           label 'helm-pod'
+//           inheritFrom 'helm-pod'
 //           yaml """
 // apiVersion: v1
 // kind: Pod
@@ -75,6 +75,12 @@ pipeline {
 //       }
 //     }
     stage('Deploy1') {
+      agent {
+
+        kubernetes {
+          inheritFrom 'jenkins-jenkins-agent'
+        }
+      }
       when {
           // Only say hello if a "greeting" is requested
           expression { true || env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
@@ -85,8 +91,8 @@ pipeline {
         //   sh 'kubectl apply -f deployment.yaml'
         // }
         // sh "readlink -f deployment.yaml"
-        // withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
-        withKubeConfig([credentialsId: 'admin_jenkins']) {
+        withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
+        //withKubeConfig([credentialsId: 'admin_jenkins']) {
             // sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
             // sh 'chmod u+x ./kubectl'
             // sh './kubectl get pods -n stage'
