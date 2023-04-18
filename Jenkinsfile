@@ -92,11 +92,9 @@ pipeline {
         // }
         // sh "readlink -f deployment.yaml"
         withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
-        //withKubeConfig([credentialsId: 'admin_jenkins']) {
-            // sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
-            // sh 'chmod u+x ./kubectl'
-            // sh './kubectl get pods -n stage'
-            sh "echo test"
+            sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
+            sh 'chmod u+x ./kubectl'
+            sh './kubectl get pods -n stage'
         }
       }
     }
