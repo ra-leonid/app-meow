@@ -80,7 +80,7 @@ spec:
       }
       steps {
         // kubernetesDeploy(configs: "deployment.yaml")
-        withKubeConfig() {
+        withKubeConfig([namespace: "stage"]) {
           sh 'kubectl apply -f deployment.yaml'
         }
 
