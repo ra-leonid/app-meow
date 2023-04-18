@@ -46,7 +46,7 @@ pipeline {
 //     }
     stage('Deploy') {
       agent {
-        
+
         kubernetes {
           label 'helm-pod'
           yaml """
@@ -59,20 +59,8 @@ spec:
     command:
     - cat
     tty: true
-    volumeMounts:
-      - name: helm-storage
-        mountPath: /var/lib/docker
-  volumes:
-    - name: helm-storage
-      emptyDir: {}
 """
-          // containerTemplate {
-          //   name 'helm'
-          //   image 'wardviaene/helm-s3'
-          //   ttyEnable true
-          //   command 'cat'
-          // }
-        }
+         }
       }
       when {
           // Only say hello if a "greeting" is requested
@@ -81,7 +69,16 @@ spec:
       steps {
         container('helm') {
           sh "helm template deploy -n stage --set image.tag=${TAG_NAME} > deployment.yaml"
+          sh "readlink -f deployment.yaml"
         }
+      }
+    }
+    stage('Deploy1') {
+       when {
+          // Only say hello if a "greeting" is requested
+          expression { env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
+      }
+      steps {
         kubernetesDeploy(configs: "deployment.yaml")
       }
     }
