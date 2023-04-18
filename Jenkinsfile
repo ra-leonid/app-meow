@@ -31,7 +31,7 @@ spec:
           script {
             docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-auth') {
               def pathTag = "raleonid/app-meow:${JOB_BASE_NAME}"
-              if(TAG_NAME == null || TAG_NAME.length() == 0) {
+              if(env.TAG_NAME == null || env.TAG_NAME.length() == 0) {
                 pathTag = "${pathTag}-${BUILD_ID}"
               }
               //build the image
@@ -58,7 +58,7 @@ spec:
       }
       when {
           // Only say hello if a "greeting" is requested
-          expression { TAG_NAME != null && TAG_NAME.length() > 0 }
+          expression { env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
       }
       steps {
         container('helm') {
