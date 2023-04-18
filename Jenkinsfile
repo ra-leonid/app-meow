@@ -38,7 +38,7 @@ spec:
               def customImage = docker.build(pathTag)
               //upload it to the registry
               customImage.push()
-              println "test4"
+              println "test5"
             }
           }
         }
