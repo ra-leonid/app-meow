@@ -79,7 +79,7 @@ spec:
       }
       steps {
         container('helm') {
-          sh "helm template app -n stage --set image.tag=${TAG_NAME} > deployment.yaml"
+          sh "helm template deploy -n stage --set image.tag=${TAG_NAME} > deployment.yaml"
         }
         kubernetesDeploy(configs: "deployment.yaml")
       }
