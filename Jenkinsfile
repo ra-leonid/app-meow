@@ -56,8 +56,8 @@ spec:
   containers:
   - name: helm
     image: wardviaene/helm-s3
-    ttyEnable true
-    command 'cat'
+    ttyEnable: true
+    command: 'cat'
     securityContext:
       privileged: true
     volumeMounts:
