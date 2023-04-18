@@ -48,12 +48,29 @@ spec:
       agent {
         kubernetes {
           label 'helm-pod'
-          containerTemplate {
-            name 'helm'
-            image 'wardviaene/helm-s3'
-            ttyEnable true
-            command 'cat'
-          }
+          defaultContainer 'helm'
+          yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: helm
+    image: wardviaene/helm-s3
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: helm-storage
+        mountPath: /var/lib/docker
+  volumes:
+    - name: helm-storage
+      emptyDir: {}
+"""
+          // containerTemplate {
+          //   name 'helm'
+          //   image 'wardviaene/helm-s3'
+          //   ttyEnable true
+          //   command 'cat'
+          // }
         }
       }
       when {
