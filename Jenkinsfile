@@ -74,12 +74,16 @@ spec:
       }
     }
     stage('Deploy1') {
-       when {
+      when {
           // Only say hello if a "greeting" is requested
           expression { env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
       }
       steps {
-        kubernetesDeploy(configs: "deployment.yaml")
+        // kubernetesDeploy(configs: "deployment.yaml")
+        withKubeConfig() {
+          sh 'kubectl apply -f deployment.yaml'
+        }
+
       }
     }
   }
