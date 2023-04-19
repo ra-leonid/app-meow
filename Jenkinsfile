@@ -1,19 +1,15 @@
 pipeline {
-  agent none
-  stages {
-    //Build container image
-    stage('Build') {
-      agent {
-        kubernetes {
-          inheritFrom 'jenkinsrun'
-          defaultContainer 'dind'
-          yaml """
+  agent {
+    kubernetes {
+//      inheritFrom 'jenkinsrun'
+      defaultContainer 'deploy'
+      yaml """
 apiVersion: v1
 kind: Pod
 spec:
   containers:
-  - name: dind
-    image: docker:18.05-dind
+  - name: deploy
+    image: raleonid/deploy:v0.0.1
     securityContext:
       privileged: true
     volumeMounts:
@@ -23,11 +19,14 @@ spec:
     - name: dind-storage
       emptyDir: {}
 """
-        }
-      }
+    }
+  }
+  stages {
+    //Build container image
+    stage('Build') {
       steps {
         sh "printenv"
-        container('dind') {
+        container('deploy') {
           script {
             docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-auth') {
               def pathTag = "raleonid/app-meow:${JOB_BASE_NAME}"
@@ -44,28 +43,11 @@ spec:
       }
     }
     stage('Deploy') {
-      agent {
-
-        kubernetes {
-          inheritFrom 'helm-pod'
-          yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: helm
-    image: wardviaene/helm-s3
-    command:
-    - cat
-    tty: true
-"""
-         }
-      }
       when {
           expression { env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
       }
       steps {
-        container('helm') {
+        container('deploy') {
           withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
             sh "helm template deploy -n stage --set image.tag=${TAG_NAME} > deployment.yaml"
             sh "readlink -f deployment.yaml"
@@ -75,32 +57,32 @@ spec:
         }
       }
     }
-    stage('Deploy2') {
-      agent {
+    // stage('Deploy2') {
+    //   agent {
 
-        kubernetes {
-          inheritFrom 'jenkins-jenkins-agent'
-        }
-      }
-      when {
-          // Only say hello if a "greeting" is requestedd
-          expression { true || env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
-      }
-      steps {
-        // script {
-        //       kubernetes.image().withName("raleonid/app-meow:${JOB_BASE_NAME}").build().fromPath(".")
-        // }
-        // kubernetesDeploy(configs: "deployment.yaml")
-        // withKubeConfig([namespace: "stage"]) {
-        //   sh 'kubectl apply -f deployment.yaml'
-        // }
-        // sh "readlink -f deployment.yaml"
-        withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
-            sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
-            sh 'chmod u+x ./kubectl'
-            sh './kubectl get pods -n stage'
-        }
-      }
-    }
+    //     kubernetes {
+    //       inheritFrom 'jenkins-jenkins-agent'
+    //     }
+    //   }
+    //   when {
+    //       // Only say hello if a "greeting" is requestedd
+    //       expression { true || env.TAG_NAME != null && env.TAG_NAME.length() > 0 }
+    //   }
+    //   steps {
+    //     // script {
+    //     //       kubernetes.image().withName("raleonid/app-meow:${JOB_BASE_NAME}").build().fromPath(".")
+    //     // }
+    //     // kubernetesDeploy(configs: "deployment.yaml")
+    //     // withKubeConfig([namespace: "stage"]) {
+    //     //   sh 'kubectl apply -f deployment.yaml'
+    //     // }
+    //     // sh "readlink -f deployment.yaml"
+    //     withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
+    //         sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
+    //         sh 'chmod u+x ./kubectl'
+    //         sh './kubectl get pods -n stage'
+    //     }
+    //   }
+    // }
   }
 }
