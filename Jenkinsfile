@@ -51,7 +51,7 @@ spec:
           withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
             sh "helm template deploy -n stage --set image.tag=${TAG_NAME} > deployment.yaml"
             sh "readlink -f deployment.yaml"
-            sh "helm upgrade --install app-meow app -n stage --set image.tag=${TAG_NAME}"
+            sh "helm upgrade --install app-meow deploy -n stage --set image.tag=${TAG_NAME}"
           }
           //sh "helm upgrade --install app-meow deploy"
         }
