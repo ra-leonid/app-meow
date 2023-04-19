@@ -94,9 +94,10 @@ pipeline {
         //   sh 'kubectl apply -f deployment.yaml'
         // }
         // sh "readlink -f deployment.yaml"
+        withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
         //withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
         //withKubeConfig([credentialsId: '394e8ffe-9d5f-4ab9-aec8-3d6fd9c657a6']) {
-        withKubeConfig() {
+        //withKubeConfig() {
         //withKubeConfig([credentialsId: '3948cc7b-9b3d-409e-a458-a91232858491']) {
             sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
             sh 'chmod u+x ./kubectl'
