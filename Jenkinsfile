@@ -32,7 +32,8 @@ pipeline {
       }
       steps {
         container('deploy') {
-          withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
+          // withKubeConfig([credentialsId: 'token-k8s-sa', namespace: "stage"]) {
+          withKubeConfig([credentialsId: 'token-k8s-sa']) {
             sh "helm upgrade --install app-meow deploy --set image.tag=${TAG_NAME}"
           }
         }
